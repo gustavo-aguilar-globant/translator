@@ -1,4 +1,4 @@
-module skillz/translator
+module gustavo-aguilar-globant/translator
 
 go 1.20
 
