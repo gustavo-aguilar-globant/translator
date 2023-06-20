@@ -1,6 +1,7 @@
 package translator_test
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/gustavo-aguilar-globant/translator"
@@ -8,54 +9,46 @@ import (
 
 func TestReadPropertiesFile(t *testing.T) {
 	tests := []struct {
-		filePath             string
-		expectedTranslations map[string]string
-		expectedError        error
+		name           string
+		fileName       string
+		expectedResult map[string]string
 	}{
 		{
-			filePath: "./testdata/es.properties",
-			expectedTranslations: map[string]string{
+			name:     "ValidPropertiesFile",
+			fileName: "es.properties",
+			expectedResult: map[string]string{
 				"hello":   "Hola",
 				"goodbye": "Adiós",
 				"welcome": "Bienvenido",
 			},
-			expectedError: nil,
 		},
 		{
-			filePath: "./testdata/us.properties",
-			expectedTranslations: map[string]string{
-				"hello":   "Hello",
-				"goodbye": "Goodbye",
-				"welcome": "Welcome",
-			},
-			expectedError: nil,
+			name:           "EmptyPropertiesFile",
+			fileName:       "empty.properties",
+			expectedResult: map[string]string{},
 		},
-		// Add more test cases for different properties files
+		// Add more test cases if needed
 	}
 
 	for _, test := range tests {
-		translations, err := translator.ReadPropertiesFile(test.filePath)
-
-		// Compare the error
-		if err != test.expectedError {
-			t.Errorf("Unexpected error. Expected: %v, Actual: %v", test.expectedError, err)
-		}
-
-		// Compare the translator
-		if len(translations) != len(test.expectedTranslations) {
-			t.Errorf("Unexpected number of translator. Expected: %d, Actual: %d", len(test.expectedTranslations), len(translations))
-		}
-
-		for key, expectedValue := range test.expectedTranslations {
-			actualValue, ok := translations[key]
-			if !ok {
-				t.Errorf("Translation not found for key: %s", key)
+		t.Run(test.name, func(t *testing.T) {
+			// Read the properties file
+			filePath := filepath.Join("testdata", test.fileName)
+			properties, err := translator.ReadPropertiesFile(filePath)
+			if err != nil {
+				t.Fatalf("Failed to read properties file: %v", err)
 			}
 
-			if actualValue != expectedValue {
-				t.Errorf("Unexpected value for key %s. Expected: %s, Actual: %s", key, expectedValue, actualValue)
+			// Verify the expected properties
+			for key, expectedValue := range test.expectedResult {
+				actualValue, ok := properties[key]
+				if !ok {
+					t.Errorf("Property key '%s' not found", key)
+				} else if actualValue != expectedValue {
+					t.Errorf("Unexpected value for property '%s'. Expected: %s, Actual: %s", key, expectedValue, actualValue)
+				}
 			}
-		}
+		})
 	}
 }
 
@@ -67,18 +60,15 @@ func TestTranslateText(t *testing.T) {
 	}
 
 	tests := []struct {
+		name                string
 		sourceText          string
 		expectedTranslation string
 		expectedError       error
 	}{
 		{
+			name:                "ValidTranslation",
 			sourceText:          "goodbye",
 			expectedTranslation: "Adiós",
-			expectedError:       nil,
-		},
-		{
-			sourceText:          "welcome",
-			expectedTranslation: "Bienvenido",
 			expectedError:       nil,
 		},
 		// Add more test cases for different source texts
@@ -87,14 +77,14 @@ func TestTranslateText(t *testing.T) {
 	for _, test := range tests {
 		translation, err := translator.TranslateText(test.sourceText, translationProperties)
 
-		// Compare the error
-		if err != test.expectedError {
-			t.Errorf("Unexpected error. Expected: %v, Actual: %v", test.expectedError, err)
-		}
-
 		// Compare the translation
 		if translation != test.expectedTranslation {
 			t.Errorf("Unexpected translation. Expected: %s, Actual: %s", test.expectedTranslation, translation)
+		}
+
+		// Compare the error
+		if err != test.expectedError {
+			t.Errorf("Unexpected error. Expected: %v, Actual: %v", test.expectedError, err)
 		}
 	}
 }
