@@ -1,4 +1,4 @@
-module gustavo-aguilar-globant/translator
+module github.com/gustavo-aguilar-globant/translator
 
 go 1.20
 
