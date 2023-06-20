@@ -3,7 +3,7 @@ package translator_test
 import (
 	"testing"
 
-	"skillz/translator"
+	"gustavo-aguilar-globant/translator"
 )
 
 func TestReadPropertiesFile(t *testing.T) {
